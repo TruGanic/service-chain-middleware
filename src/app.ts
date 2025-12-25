@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import healthRoutes from './routes/healthRoutes';
 import dotenv from 'dotenv';
+import testRoutes from './routes/testRoutes';
 
 // Load Env Config
 dotenv.config();
@@ -17,6 +18,7 @@ app.use(express.json());
 
 // Register Routes
 app.use('/api/health', healthRoutes);
+app.use('/api/test', testRoutes);
 
 // Start Server
 app.listen(PORT, () => {
