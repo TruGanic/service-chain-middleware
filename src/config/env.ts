@@ -22,7 +22,7 @@ export const config: FabricConfig = {
     port: parseInt(process.env.PORT || '3000'),
     mspId: process.env.MSP_ID || 'Org1MSP',
     channelName: process.env.CHANNEL_NAME || 'service-channel',
-    chaincodeName: process.env.CHAINCODE_NAME || 'basic',
+    chaincodeName: process.env.CHAINCODE_NAME || 'transport',
     peerEndpoint: process.env.PEER_ENDPOINT || 'localhost:7051',
     peerHostAlias: process.env.PEER_HOST_ALIAS || 'peer0.org1.example.com',
     

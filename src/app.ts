@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import healthRoutes from './routes/healthRoutes';
 import dotenv from 'dotenv';
 import testRoutes from './routes/testRoutes';
+import transportRoutes from './routes/transportRoutes';
 
 // Load Env Config
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(express.json());
 // Register Routes
 app.use('/api/health', healthRoutes);
 app.use('/api/test', testRoutes);
+app.use('/api/transport', transportRoutes);
 
 // Start Server
 app.listen(PORT, () => {
