@@ -52,8 +52,8 @@ export const getContract = async (): Promise<Contract> => {
             identity: { mspId: config.mspId, credentials: cert },
             signer,
             // Timeouts to prevent hanging requests
-            evaluateOptions: () => ({ deadline: Date.now() + 5000 }), // 5s for reads
-            submitOptions: () => ({ deadline: Date.now() + 5000 }),   // 5s for writes
+            evaluateOptions: () => ({ deadline: Date.now() + 15000 }), // 15s for reads
+            submitOptions: () => ({ deadline: Date.now() + 15000 }),   // 15s for writes
         });
 
         // 7. Get Network & Contract
