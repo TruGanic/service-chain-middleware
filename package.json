@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/app.js",
+    "start:farmer": "DOTENV_CONFIG_PATH=.env.farmer node dist/app.js",
+    "start:transporter": "DOTENV_CONFIG_PATH=.env.transporter node dist/app.js",
+    "start:retailer": "DOTENV_CONFIG_PATH=.env.retailer node dist/app.js",
     "dev": "nodemon src/app.ts"
   },
   "keywords": [],
