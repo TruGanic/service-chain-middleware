@@ -1,10 +1,5 @@
-import dotenv from 'dotenv';
-import path from 'path';
+// src/config/env.ts
 
-// Load variables from .env file
-dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '.env' });
-
-// Define interface for strict typing
 interface FabricConfig {
     port: number;
     mspId: string;
@@ -19,25 +14,23 @@ interface FabricConfig {
 }
 
 export const config: FabricConfig = {
+    // If process.env.PORT is set by app.ts, use it. Otherwise 3000.
     port: parseInt(process.env.PORT || '3000'),
-    
-    // Updated Defaults for the Supply Chain Network
+
     mspId: process.env.MSP_ID || 'FarmerMSP',
     channelName: process.env.CHANNEL_NAME || 'supplychainchannel',
     chaincodeName: process.env.CHAINCODE_NAME || 'transport',
     peerEndpoint: process.env.PEER_ENDPOINT || 'localhost:7051',
     peerHostAlias: process.env.PEER_HOST_ALIAS || 'peer0.farmer.supplychain.net',
     
-    // Critical Paths
     cryptoPath: process.env.CRYPTO_PATH || '',
     keyDirPath: process.env.KEY_DIR_PATH || '',
     certPath: process.env.CERT_PATH || '',
     tlsCertPath: process.env.TLS_CERT_PATH || ''
 };
 
-// Validation: Stop server if critical configuration is missing
-if (!config.cryptoPath || !config.keyDirPath || !config.certPath) {
-    console.error("❌ FATAL ERROR: Crypto paths are missing in .env file.");
-    console.error("Please check CRYPTO_PATH, KEY_DIR_PATH, and CERT_PATH.");
-    process.exit(1);
+// Validation
+// We do NOT exit here. We let app.ts handle the exit logic to avoid silent crashes.
+if (!config.cryptoPath) {
+    console.error("⚠️  WARNING: CRYPTO_PATH is missing. App may fail to connect.");
 }
