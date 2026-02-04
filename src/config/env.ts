@@ -26,7 +26,7 @@ export const config: FabricConfig = {
     cryptoPath: process.env.CRYPTO_PATH || '',
     keyDirPath: process.env.KEY_DIR_PATH || '',
     certPath: process.env.CERT_PATH || '',
-    tlsCertPath: process.env.TLS_CERT_PATH || ''
+    tlsCertPath: process.env.TLS_CERT_PATH || '',
 };
 
 // Validation
