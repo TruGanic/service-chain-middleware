@@ -5,21 +5,21 @@ import jwksClient from 'jwks-rsa';
 // 1. Setup the Key Client
 // points to Supabase public key drawer.
 const client = jwksClient({
-  jwksUri: process.env.SUPABASE_JWKS_URI || '',
-  cache: true,      
-  rateLimit: true, 
+    jwksUri: process.env.SUPABASE_JWKS_URI || '',
+    cache: true,
+    rateLimit: true,
 });
 
 // 2. Helper function to extract the signing key
 function getKey(header: any, callback: any) {
-  client.getSigningKey(header.kid, (err, key) => {
-    if (err) {
-      console.error("[JWKS Error]", err);
-      return callback(err, null);
-    }
-    const signingKey = key?.getPublicKey();
-    callback(null, signingKey);
-  });
+    client.getSigningKey(header.kid, (err, key) => {
+        if (err) {
+            console.error("[JWKS Error]", err);
+            return callback(err, null);
+        }
+        const signingKey = key?.getPublicKey();
+        callback(null, signingKey);
+    });
 }
 
 // Interface for the user data

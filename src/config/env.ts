@@ -1,5 +1,3 @@
-// src/config/env.ts
-
 interface FabricConfig {
     port: number;
     mspId: string;
