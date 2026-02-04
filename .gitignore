@@ -1,2 +1,5 @@
 node_modules/
 .env
+.env.farmer
+.env.transporter
+.env.retailer
