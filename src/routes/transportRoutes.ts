@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { confirmPickup, completeTrip, getBatch } from '../controllers/transportController';
 import { authenticateSupabase } from '../middleware/auth';
+import { authorizeOrg } from '../middleware/authorizeOrg';
 
 const router = Router();
 
