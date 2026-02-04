@@ -1,14 +1,12 @@
 import dotenv from 'dotenv';
 
-// 1. LOAD CONFIGURATION FIRST
-// This pushes .env.transporter variables (PORT=3001) into process.env
+
 const envFile = process.env.DOTENV_CONFIG_PATH;
 dotenv.config({ path: envFile });
 
 console.log(`✅ Environment Config Loaded from: ${envFile}`);
 
-// 2. NOW IMPORT OTHER FILES
-// Since config is loaded, these files will see PORT=3001
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -39,7 +37,7 @@ const server = app.listen(PORT, () => {
 });
 
 // Heartbeat
-setInterval(() => {}, 1000 * 60 * 60);
+setInterval(() => { }, 1000 * 60 * 60);
 
 // Error Handling
 server.on('error', (e: any) => {
