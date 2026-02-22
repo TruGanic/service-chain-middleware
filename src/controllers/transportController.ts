@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getContract } from '../services/fabricGateway';
+import { uploadToIPFS } from '../services/ipfsService';
 import { TextDecoder } from 'util';
 
 const utf8Decoder = new TextDecoder();
@@ -9,34 +10,53 @@ const utf8Decoder = new TextDecoder();
 // =========================================================================
 export const confirmPickup = async (req: Request, res: Response) => {
     try {
-        // Extract data from the Mobile App's JSON payload
-        const { batchID, farmerName, newOwner, location } = req.body;
-
-        // Validation
-        if (!batchID || !farmerName || !newOwner || !location) {
-            return res.status(400).json({ error: 'Missing required fields: batchID, farmerName, newOwner, location' });
+        // 1. Authenticate user
+        const transporterId = req.user?.sub;
+        if (!transporterId) {
+            return res.status(401).json({ error: 'Unauthorized: No Supabase ID found' });
         }
 
-        console.log(`[🚚 PICKUP] Submitting transaction for ${batchID}...`);
+        // 2. Extract text fields (Note: when using multipart/form-data, numbers might come through as strings)
+        const { produceType, supplierId, farmerName, pickupLocation, weightKg, notes } = req.body;
 
-        // Get Fabric Contract
+        if (!produceType || !supplierId || !farmerName || !pickupLocation || !weightKg) {
+            return res.status(400).json({ error: 'Missing required fields in payload' });
+        }
+
+        // 3. Handle the optional file upload to IPFS
+        let invoiceHash = "NONE";
+        if (req.file) {
+            console.log(`[📦 IPFS] Uploading invoice for new pickup...`);
+            invoiceHash = await uploadToIPFS(req.file.buffer, req.file.originalname);
+        }
+
+        // 4. Generate unique Batch ID
+        const batchID = `BATCH-${Date.now()}`;
+        console.log(`[🚚 PICKUP] Submitting transaction ${batchID} to ledger...`);
+
         const contract = await getContract();
 
-        // Submit to Blockchain
+        // 5. Submit to Hyperledger Fabric
         await contract.submitTransaction(
             'ConfirmPickup',
             batchID,
+            produceType,
             farmerName,
-            newOwner,
-            location
+            supplierId,
+            transporterId,
+            pickupLocation,
+            weightKg,
+            invoiceHash,
+            notes || "NONE"
         );
 
         console.log(`[✅ SUCCESS] Pickup confirmed for ${batchID}`);
 
         res.status(200).json({
             success: true,
-            message: 'Pickup confirmed. Status updated to IN_TRANSIT.',
-            batchID
+            message: 'Pickup confirmed and recorded on-chain.',
+            batchID,
+            invoiceIpfs: invoiceHash !== "NONE" ? invoiceHash : null
         });
 
     } catch (error: any) {
