@@ -119,10 +119,31 @@ export const getBatch = async (req: Request, res: Response) => {
         const resultBytes = await contract.evaluateTransaction('ReadAsset', id);
         const resultJson = utf8Decoder.decode(resultBytes);
 
-        res.status(200).json(JSON.parse(resultJson));
+        // Parse the raw blockchain data
+        const batchData = JSON.parse(resultJson);
+
+        // Safely attach the Pinata URL
+        if (batchData.invoiceHash && batchData.invoiceHash !== "NONE") {
+          
+            const gateway = process.env.PINATA_GATEWAY_URL 
+            batchData.invoiceUrl = `${gateway}/ipfs/${batchData.invoiceHash}`;
+        } else {
+            batchData.invoiceUrl = null;
+        }
+
+        // Send the modified object
+        res.status(200).json(batchData);
 
     } catch (error: any) {
+        // Log the actual JavaScript/Blockchain error to your Node console
         console.error(`[❌ ERROR] Query failed:`, error);
-        res.status(404).json({ error: `Asset ${req.params.id} not found.` });
+        
+        // Check if it's specifically a Fabric error stating the asset is missing
+        if (error.message && error.message.includes('does not exist')) {
+            return res.status(404).json({ error: `Asset ${req.params.id} not found.` });
+        }
+        
+        // If it's a JavaScript error (like a typo), return a 500 error instead
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 };
