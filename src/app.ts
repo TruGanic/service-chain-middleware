@@ -13,6 +13,7 @@ import helmet from 'helmet';
 import healthRoutes from './routes/healthRoutes';
 import testRoutes from './routes/testRoutes';
 import transportRoutes from './routes/transportRoutes';
+import retailerRoutes from './routes/retailerRoutes';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use(express.json());
 app.use('/api/health', healthRoutes);
 app.use('/api/test', testRoutes);
 app.use('/api/transport', transportRoutes);
+app.use('/api/retailer', retailerRoutes);
 
 // 4. START SERVER
 const server = app.listen(PORT, () => {
