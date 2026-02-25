@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getContract } from '../services/fabricGateway';
 import { TextDecoder } from 'util';
+import { toSriLankaTime } from '../utils/timeUtils';
 
 const utf8Decoder = new TextDecoder();
 
@@ -14,9 +15,19 @@ export const getBatchHistory = async (req: Request, res: Response) => {
         
         // We use evaluateTransaction because we are only reading historical data
         const resultBytes = await contract.evaluateTransaction('RetailerContract:GetAssetHistory', id);
-        const resultJson = utf8Decoder.decode(resultBytes);
+        
+          const history: any[] = JSON.parse(utf8Decoder.decode(resultBytes));
 
-        res.status(200).json(JSON.parse(resultJson));
+        const enriched = history.map((record) => ({
+            ...record,
+            blockTimestampLK: record.blockTimestamp
+                ? toSriLankaTime(record.blockTimestamp)
+                : null,
+        }));
+
+        res.status(200).json(enriched);
+
+        
 
     } catch (error: any) {
         console.error(`[❌ ERROR] History fetch failed:`, error);
