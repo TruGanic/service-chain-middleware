@@ -2,13 +2,17 @@ import { Request, Response } from 'express';
 import { getContract } from '../services/fabricGateway';
 import { uploadToIPFS } from '../services/ipfsService';
 import { TextDecoder } from 'util';
+import { CompleteTrip } from '../interfaces/complete-trip.interface';
+import { ConfirmPickup } from '../interfaces/confirm-pickup.interface';
+import { TypedRequest } from '../interfaces/typed.request.interface';
 
 const utf8Decoder = new TextDecoder();
 
-// =========================================================================
-// 1. Confirm Pickup (Start of Journey)
-// =========================================================================
-export const confirmPickup = async (req: Request, res: Response) => {
+/**
+ *  Confirm Pickup (Start of Journey)
+ */
+
+export const confirmPickup = async (req: TypedRequest<ConfirmPickup>, res: Response) => {
     try {
         // 1. Authenticate user
         const transporterId = req.user?.sub;
@@ -65,12 +69,13 @@ export const confirmPickup = async (req: Request, res: Response) => {
     }
 };
 
-// =========================================================================
-// 2. Complete Trip (The Novelty Sync)
-// =========================================================================
-export const completeTrip = async (req: Request, res: Response) => {
+/**
+ * Complete Trip (The Novelty Sync)
+ * 
+ */
+export const completeTrip = async (req: TypedRequest<CompleteTrip>, res: Response) => {
     try {
-        const { batchID, min, max, avg, merkleRoot } = req.body;
+        const { batchID, minTemp, maxTemp, avgTemp, minHumidity, maxHumidity, avgHumidity, merkleRoot } = req.body;
 
         if (!batchID || !merkleRoot) {
             return res.status(400).json({ error: 'Missing batchID or merkleRoot' });
@@ -84,9 +89,12 @@ export const completeTrip = async (req: Request, res: Response) => {
         await contract.submitTransaction(
             'CompleteTrip',
             batchID,
-            String(min),
-            String(max),
-            String(avg),
+            String(minTemp),
+            String(maxTemp),
+            String(avgTemp),
+            String(minHumidity),
+            String(maxHumidity),
+            String(avgHumidity),
             merkleRoot
         );
 
@@ -104,17 +112,17 @@ export const completeTrip = async (req: Request, res: Response) => {
     }
 };
 
-// =========================================================================
-// 3. Read Batch (Query)
-// =========================================================================
+/**
+  Read Batch (Query)
+ */
 export const getBatch = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        
+
         console.log(`[🔍 QUERY] Reading asset ${id}...`);
-        
+
         const contract = await getContract();
-        
+
         // EvaluateTransaction is for READING (Fast, no consensus needed)
         const resultBytes = await contract.evaluateTransaction('ReadAsset', id);
         const resultJson = utf8Decoder.decode(resultBytes);
@@ -124,8 +132,8 @@ export const getBatch = async (req: Request, res: Response) => {
 
         // Safely attach the Pinata URL
         if (batchData.invoiceHash && batchData.invoiceHash !== "NONE") {
-          
-            const gateway = process.env.PINATA_GATEWAY_URL 
+
+            const gateway = process.env.PINATA_GATEWAY_URL
             batchData.invoiceUrl = `${gateway}/ipfs/${batchData.invoiceHash}`;
         } else {
             batchData.invoiceUrl = null;
@@ -135,15 +143,15 @@ export const getBatch = async (req: Request, res: Response) => {
         res.status(200).json(batchData);
 
     } catch (error: any) {
-        // Log the actual JavaScript/Blockchain error to your Node console
+        // Log the actual JavaScript/Blockchain error 
         console.error(`[❌ ERROR] Query failed:`, error);
-        
-        // Check if it's specifically a Fabric error stating the asset is missing
+
+        // Check specifically a Fabric error stating the asset is missing
         if (error.message && error.message.includes('does not exist')) {
             return res.status(404).json({ error: `Asset ${req.params.id} not found.` });
         }
-        
-        // If it's a JavaScript error (like a typo), return a 500 error instead
+
+        // , return a 500 error 
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 };
