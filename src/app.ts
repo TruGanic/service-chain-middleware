@@ -17,8 +17,7 @@ import retailerRoutes from './routes/retailerRoutes';
 
 const app = express();
 
-// 3. ASSIGN PORT
-// Reads the variable we just loaded.
+// Reads the variable just loaded.
 const PORT = parseInt(process.env.PORT || '3000');
 
 app.use(helmet());
