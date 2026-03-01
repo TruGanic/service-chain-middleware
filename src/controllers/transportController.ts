@@ -21,9 +21,9 @@ export const confirmPickup = async (req: TypedRequest<ConfirmPickup>, res: Respo
         }
 
         // 2. Extract text fields (Note: when using multipart/form-data, numbers might come through as strings)
-        const { produceType, supplierId, farmerName, pickupLocation, weightKg, notes } = req.body;
+        const { batchId, produceType, supplierId, farmerName, pickupLocation, weightKg, notes, pickupTimestamp } = req.body;
 
-        if (!produceType || !supplierId || !farmerName || !pickupLocation || !weightKg) {
+        if (!produceType || !supplierId || !farmerName || !pickupLocation || !weightKg || !pickupTimestamp) {
             return res.status(400).json({ error: 'Missing required fields in payload' });
         }
 
@@ -34,8 +34,8 @@ export const confirmPickup = async (req: TypedRequest<ConfirmPickup>, res: Respo
             invoiceHash = await uploadToIPFS(req.file.buffer, req.file.originalname);
         }
 
-        // 4. Generate unique Batch ID
-        const batchID = `BATCH-${Date.now()}`;
+        // 4. Batch ID Logging for clarity in the console
+        const batchID = batchId;
         console.log(`[🚚 PICKUP] Submitting transaction ${batchID} to ledger...`);
 
         const contract = await getContract();
@@ -51,7 +51,8 @@ export const confirmPickup = async (req: TypedRequest<ConfirmPickup>, res: Respo
             pickupLocation,
             weightKg,
             invoiceHash,
-            notes || "NONE"
+            notes || "NONE",
+            pickupTimestamp
         );
 
         console.log(`[✅ SUCCESS] Pickup confirmed for ${batchID}`);
