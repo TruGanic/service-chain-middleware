@@ -14,6 +14,7 @@ import healthRoutes from './routes/healthRoutes';
 import testRoutes from './routes/testRoutes';
 import transportRoutes from './routes/transportRoutes';
 import retailerRoutes from './routes/retailerRoutes';
+import farmerRoutes from './routes/farmerRoutes';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(express.json());
 
 app.use('/api/health', healthRoutes);
 app.use('/api/test', testRoutes);
+app.use('/api/farmer', farmerRoutes);
 app.use('/api/transport', transportRoutes);
 app.use('/api/retailer', retailerRoutes);
 
